@@ -69,7 +69,7 @@ func getMetaData(resource string) (string, error) {
 // return oss public endpoint in format "oss-%s.aliyuncs.com"
 // return oss accelerate endpoint in format "oss-accelerate.aliyuncs.com"
 // return oss internal endpoint in format "oss-%s-internal.aliyuncs.com"
-func getOssEndpoint(config map[string]string) string {
+func getOssEndpoint(config map[string]string, ossurl string) string {
 	if networkType := config[networkTypeConfigKey]; networkType != "" {
 		switch networkType {
 		case networkTypeInternal:
@@ -98,12 +98,12 @@ func getOssEndpoint(config map[string]string) string {
 	if value := config[regionConfigKey]; value == "" {
 		if value, err := getMetaData(metadataRegionKey); err != nil || value == "" {
 			// set default region
-			return "oss-cn-hangzhou.aliyuncs.com"
+			return "oss-cn-luoyang-onlinestor-d01-a.res.online.stor"
 		} else {
-			return fmt.Sprintf("oss-%s.aliyuncs.com", value)
+			return fmt.Sprintf("oss-%s-%s", value, ossurl)
 		}
 	} else {
-		return fmt.Sprintf("oss-%s.aliyuncs.com", value)
+		return fmt.Sprintf("oss-%s-%s", value, ossurl)
 	}
 }
 

@@ -70,6 +70,7 @@ type ObjectStore struct {
 	privateKey      []byte
 	ramRole         string
 	endpoint        string
+	ossurl          string
 }
 
 // newObjectStore init ObjectStore
@@ -100,11 +101,19 @@ func (o *ObjectStore) Init(config map[string]string) error {
 	accessKeySecret := ""
 	stsToken := ""
 	encryptionKeyID := ""
+	ossurl := ""
 
 	var client *oss.Client
 	var err error
 
-	endpoint := getOssEndpoint(config)
+	if err := loadEnv(); err != nil {
+		return err
+	}
+	ossurl = os.Getenv("ALIBABA_CLOUD_OSS_URL")
+	if len(ossurl) == 0 {
+		return errors.Errorf("ALIBABA_CLOUD_OSS_URL environment variable is not set")
+	}
+	endpoint := getOssEndpoint(config, ossurl)
 	veleroForAck := os.Getenv("VELERO_FOR_ACK")
 	isHybrid := os.Getenv("IS_HYBRID")
 	if veleroForAck == "true" {
@@ -133,9 +142,6 @@ func (o *ObjectStore) Init(config map[string]string) error {
 		}
 
 	} else {
-		if err := loadEnv(); err != nil {
-			return err
-		}
 		accessKeyID = os.Getenv("ALIBABA_CLOUD_ACCESS_KEY_ID")
 		accessKeySecret = os.Getenv("ALIBABA_CLOUD_ACCESS_KEY_SECRET")
 		stsToken = os.Getenv("ALIBABA_CLOUD_ACCESS_STS_TOKEN")
@@ -165,6 +171,7 @@ func (o *ObjectStore) Init(config map[string]string) error {
 
 	o.endpoint = endpoint
 	o.encryptionKeyID = encryptionKeyID
+	o.ossurl = ossurl
 
 	return nil
 }
